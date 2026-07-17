@@ -1,43 +1,18 @@
-# Dataset and Derived Artifacts
-
-The code release and data release are separate. Do not commit the local `data/` tree,
-ROS bag conversion backups, model checkpoints, or generated experiment results to Git.
+# Dataset 
+You have to download two datasets. The [RBO dataset of articulated objects and interactions](https://zenodo.org/records/1036660#.XsT9gxaxU5k) and the [RBO affordance](https://zenodo.org/records/21414128) dataset. 
 
 ## Original interaction data
 
-The experiments use the RBO interaction dataset. Obtain and cite the original release
-from Zenodo: <https://doi.org/10.5281/zenodo.1036660> (CC BY 4.0). This repository does
-not redistribute the original bags. Converted ROS 2 bags remain derived copies of that
-dataset and must retain its attribution and terms.
-
-## Derived artifacts
-
-The filter consumes one optical-flow field, one HAP heatmap, and/or one GraspNet output
-per synchronized RGB-D timestamp:
+The original dataset only provides ROS1 rosbags, which are not compatible with newer ROS2 versions. Therefore, you need to convert the ROS1 .bag files to ROS2 .db3. The folder structure should look like
 
 ```text
-flow/<category>/<instance>/<timestamp>.npy
-hap_output/<category>/<instance>/<timestamp>_heatmap.npy
-GraspNet/<category>/<instance>/<timestamp>_unprocessed_output.npy
+/rbo_dataset
+  interactions/     ← index + published transform CSVs; used by evaluation
+  interactions2/    ← locally converted ROS 2 .db3 bags; used by filter input
+  objects/          ← annotated meshes
+  objects_original/ ← meshes from the rbo_dataset. You need to rename them
 ```
 
-Generate permitted artifacts with `cpf-precompute`; record the exact code commit,
-experiment/project config, model source commit, checkpoint hash, input dataset version,
-and command. A release manifest must additionally list every file's relative path,
-byte size, SHA-256, model identifier, sequence, and timestamp.
 
-HAP output redistribution is not yet authorized: the upstream Hands as Probes repository
-declares no license. Do not publish HAP source, checkpoints, or heatmaps until the
-copyright holders confirm that the intended distribution is permitted. Contact-GraspNet
-code/checkpoints and outputs remain subject to NVIDIA's non-commercial research and
-evaluation terms; they are not relicensed by this repository's MIT license.
+Once downloaded, you can provide the path to the rbo_dataset in the config file
 
-## Release exclusions and known gaps
-
-- Exclude all `*.orig_ros2` conversion backups.
-- Never include checkpoints, credentials, absolute machine paths, caches, or results.
-- The local interaction index contains entries for `laptop26` and `rubikscube09`, but
-  their converted bags were absent during the latest audit. Acquire them or document
-  their exclusion before publishing a complete manifest.
-- Publish large archives through an archival data service such as Zenodo and assign a
-  version/DOI; GitHub source history is not the data distribution mechanism.
