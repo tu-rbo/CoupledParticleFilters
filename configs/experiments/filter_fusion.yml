@@ -1,0 +1,144 @@
+schema_version: 1
+name: filter_fusion
+description: Standard coupled HAP and GraspNet particle-filter fusion.
+algorithm_profile: paper_multiply_2025
+
+runtime: {seed: 777, deterministic: true, device: auto, dtype: float32}
+input:
+  source: rosbag2
+  dataset_root: ../../data/rbo_dataset
+  interactions_csv: ../../data/rbo_dataset/interactions/interactions_index.csv
+  # Keep this order fixed: the configured seed is shared across bags.
+  bag_paths:
+    - ../../data/rbo_dataset/interactions2/ikea/ikea01_o_ros2/ikea01_o_ros2.db3
+    - ../../data/rbo_dataset/interactions2/ikea/ikea03_o_ros2/ikea03_o_ros2.db3
+    - ../../data/rbo_dataset/interactions2/ikeasmall/ikeasmall01_o_ros2/ikeasmall01_o_ros2.db3
+    - ../../data/rbo_dataset/interactions2/laptop/laptop03_o_ros2/laptop03_o_ros2.db3
+    - ../../data/rbo_dataset/interactions2/tripod/tripod01_o_ros2/tripod01_o_ros2.db3
+  categories: []
+  exclude_path_patterns: ["**/*.orig_ros2/*.db3"]
+  topics:
+    color: [/camera/rgb/image_raw, /camera/color/image_raw]
+    depth: [/camera/depth_registered/image_raw, /camera/aligned_depth_to_color/image_raw]
+    camera_info: [/camera/depth_registered/camera_info, /camera/color/camera_info]
+  image: {width: 640, height: 480, max_depth_m: 3.0, depth_scale_16u: 0.001, invalid_depth_policy: max_depth}
+
+optical_flow:
+  source: precomputed
+  artifact_root: ../../data/flow
+  missing_policy: error
+  minimum_motion_px: 1.0
+  farneback: {pyr_scale: 0.5, levels: 3, winsize: 15, iterations: 3, poly_n: 5, poly_sigma: 1.2, flags: 0}
+
+pipelines:
+  - name: graspnet
+    estimator: graspnet
+    mode: particle_filter
+    measurement_source: precomputed
+    artifact_root: ../../data/GraspNet
+    raw_sample_count: 8000
+    filter:
+      num_particles: 8000
+      queue_length: 2
+      readiness_policy: legacy_extra_frame
+      flow_coordinates: legacy_xy_as_row_column
+      initialize_from_measurement: true
+      initialization_clip: [0.02, 0.95]
+      motion_noise_std: 0.005
+      max_particle_movement_m: 0.05
+      injection_count: 2750
+      injection_draw_count: 3000
+      injection_warmup: [60, 3000]
+      injection_density_sigma: 0.06
+      injection_mu_offset: 0.1
+      injection_sigma_offset: 0.05
+      measurement_neighbor_radius_m: 0.04
+      measurement_distance_sigma: 0.02
+      orientation_weight: 0.5
+      occlusion_kernel_size: 21
+      occlusion_edge_max_diff_m: 0.3
+      occlusion_near_object_max_diff_m: 1.5
+      image_border_px: 0
+    hap_model: null
+    graspnet_model:
+      checkpoint_dir: ../../pytorch_cgn/contact_graspnet_pytorch/checkpoints/contact_graspnet
+      forward_passes: 4
+      local_regions: false
+      skip_border_objects: true
+      filter_grasps: false
+      z_range_m: [0.2, 3.0]
+      all_points: false
+      scale_heatmap: true
+      selected_threshold: 0.30
+      argument_overrides: []
+  - name: hap
+    estimator: hap
+    mode: particle_filter
+    measurement_source: precomputed
+    artifact_root: ../../data/hap_output
+    raw_sample_count: 8000
+    filter:
+      num_particles: 8000
+      queue_length: 2
+      readiness_policy: legacy_extra_frame
+      flow_coordinates: row_column
+      initialize_from_measurement: true
+      initialization_clip: [0.10, 0.95]
+      motion_noise_std: 15.0
+      max_particle_movement_m: 0.05
+      injection_count: 3000
+      injection_draw_count: 3000
+      injection_density_sigma: 15.0
+      injection_mu_offset: 0.15
+      injection_sigma_offset: 0.30
+      measurement_neighbor_radius_m: 0.04
+      measurement_distance_sigma: 0.02
+      orientation_weight: 0.5
+      occlusion_kernel_size: 21
+      occlusion_edge_max_diff_m: 0.3
+      occlusion_near_object_max_diff_m: 1.5
+      image_border_px: 0
+    hap_model:
+      model_dir: ../../hotspots/models/EPIC-KITCHENS
+      model_name: SegNet_hands_seed0
+      checkpoint_epoch: 350
+      grasp_info: ../../hotspots/configs/grasp_info.yaml
+      image_size: 128
+      batch_size: 512
+      mask_location: bc
+      slack: 1
+      scales: [30, 50]
+      hand_conditioned: false
+      mask_input: true
+      symmetric_encoder_decoder: false
+      two_heads: true
+      loss_masking: false
+    graspnet_model: null
+
+fusion:
+  enabled: true
+  strategy: paper_multiply
+  kernel_bandwidth_m: 0.06
+  start_frame: 1
+  every_n_frames: 1
+  targets: both
+  alternating_period: 4
+  alternating_multiply_phase: 0
+  smooth_clip_steepness: 3.0
+  graspnet_ranges: {measurement: [0.205, 0.255], cross_density: [0.30, 0.60]}
+  hap_ranges: {measurement: [0.20826637606642385, 0.2859282100013229], cross_density: [0.45, 0.55]}
+
+numerics: {normalization_epsilon: 1.0e-12, zero_mass_policy: error, nonfinite_policy: error, distance_chunk_size: 1024}
+evaluation: {enabled: true, data_root: ../../data/rbo_dataset, distance_threshold_m: 0.02, render: false, sample_count: 200, sampling: uniform_with_replacement, sampling_stage: post_resample, seed: 777}
+output:
+  root: ../../results
+  errors_dir: ../../errors
+  save_resolved_config: true
+  save_metrics: true
+  save_particles: false
+  log_level: INFO
+  log_every_n_frames: 1
+  render_enabled: true
+  render_every_n_frames: 30
+  heatmap_kernel_ratio: 16
+  video: {enabled: false, frame_rate: 20, output_rate: 10, codec: mpeg4, quality: 2}

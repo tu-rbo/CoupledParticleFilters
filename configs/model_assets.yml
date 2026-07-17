@@ -1,0 +1,10 @@
+assets:
+  contact_graspnet:
+    description: Contact-GraspNet PyTorch inference checkpoint
+    url: https://raw.githubusercontent.com/elchun/contact_graspnet_pytorch/2d71da4e50a04aa353352d1cae99f20f7022145b/checkpoints/contact_graspnet/checkpoints/model.pt
+    destination: pytorch_cgn/contact_graspnet_pytorch/checkpoints/contact_graspnet/checkpoints/model.pt
+    sha256: 39fc3439d5814043ba64e0715c127c2e8aca6ea376c22614e11af1bc89317762
+    size_bytes: 26628146
+    source_repository: https://github.com/elchun/contact_graspnet_pytorch
+    source_commit: 2d71da4e50a04aa353352d1cae99f20f7022145b
+    license: NVIDIA Source Code License for Contact-GraspNet (non-commercial research/evaluation only)

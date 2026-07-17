@@ -1,0 +1,8 @@
+[submodule "pytorch_cgn/contact_graspnet_pytorch"]
+	path = pytorch_cgn/contact_graspnet_pytorch
+	url = https://github.com/tu-rbo/contact_graspnet_pytorch.git
+	shallow = true
+[submodule "other_baseline/where2act"]
+	path = other_baseline/where2act
+	url = https://github.com/daerduoCarey/where2act.git
+	shallow = true

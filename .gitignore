@@ -1,0 +1,119 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+build/
+dist/
+*.whl
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+*.env
+.env
+
+# Local/editor state
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Generated experiment data and logs
+data/
+logs/
+errors/
+results/
+wandb/
+visdom/
+inferred_IHdata/
+real_test/
+wandb_configs/
+
+# Large datasets, checkpoints, and model outputs
+checkpoints/
+models/
+datasets/
+rosbags/
+bags/
+artifacts/
+outputs/
+runs/
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.bag
+*.db3
+*.mcap
+*.sqlite3
+
+# Generated media
+*.mp4
+*.avi
+*.mov
+*.gif
+frame*.png
+viz_*.png
+
+# Submodule-local build metadata and downloaded assets
+pytorch_cgn/contact_graspnet_pytorch/contact_graspnet_pytorch.egg-info/
+pytorch_cgn/checkpoints/
+pytorch_cgn/UNKNOWN.egg-info/
+
+# HAP adapter/config/checkpoints are local-only until upstream grants redistribution.
+hotspots/
+# Heavy vendored assets; document/download them instead of committing.
+pytorch_cgn/contact_graspnet_pytorch/test_data/
+pytorch_cgn/contact_graspnet_pytorch/checkpoints/
+pytorch_cgn/contact_graspnet_pytorch/Pointnet_Pointnet2_pytorch/log/
+
+# Stray local virtualenv; must never be committed
+/afford/
+
+# Internal working documents excluded from publication
+/CODEX_HANDOFF.md
+/AGENTS.md
+
+# Local-only documentation, validation material, and retired experiment paths.
+# Keep these files on this machine without allowing a broad `git add` to publish them.
+/docs/
+/tests/
+/configs/diagnostics/
+/configs/experiments/*
+!/configs/experiments/filter_fusion.yml
+/src/coupled_particle_filters/linked_comparison.py
+/src/coupled_particle_filters/paper_parity.py
+
+# Legacy research scripts excluded from publication
+# (superseded by src/coupled_particle_filters/; explicit filenames so
+# `git add .` can never pull them in)
+/v2_filter_fusion.py
+/ros2_v2filterfusion.py
+/pipeline.py
+/pipeline3d.py
+/particle_filter.py
+/particle_filter3d.py
+/rosbag2.py
+/used_colormap.py
+/hrp_affordance_model.py
+/utils/
+/configs/runs/

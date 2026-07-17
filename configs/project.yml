@@ -1,0 +1,127 @@
+# Project-wide defaults and local paths.
+# Copy this file for your machine and override paths there if needed.
+
+paths:
+  data_root: data
+  logs_root: logs
+  errors_dir: errors
+  rbo_dataset: data/rbo_dataset
+  evaluation_data: data/rbo_dataset
+  interactions_dir: data/rbo_dataset/interactions
+  real_test_bag: real_test/real/placeholder.db3
+
+outputs:
+  flow: data/flow
+  graspnet: data/GraspNet
+  hap: data/hap_output
+  hrp: data/hrp_output
+  where2act: data/where2act_output
+  attention: data/attention_output
+  affordance: data/affordance_output
+
+model_paths:
+  contact_graspnet_checkpoint: pytorch_cgn/contact_graspnet_pytorch/checkpoints/contact_graspnet
+  hap_model_dir: hotspots/models/EPIC-KITCHENS
+  hap_grasp_info: hotspots/configs/grasp_info.yaml
+  hrp_in_checkpoint: checkpoints/IN_hrp.pth
+  hrp_eg_checkpoint: checkpoints/EG_hrp.pth
+  affordance_dir: diffusion/affordance_diffusion
+
+topics:
+  rosbag:
+    - /camera/depth_registered/camera_info
+    - /camera/depth_registered/image_raw
+    - /camera/rgb/image_raw
+    - /camera/color/camera_info
+    - /camera/color/image_raw
+    - /camera/aligned_depth_to_color/image_raw
+  ros2_live:
+    color_image: /camera/camera/color/image_raw
+    depth_image: /camera/camera/aligned_depth_to_color/image_raw
+    camera_info: /camera/camera/color/camera_info
+
+run_defaults:
+  name: local_run
+  instance: basic examples
+  type: filter
+  project_id: "1"
+  max_depth: 3.0
+  precompute_optical_flow: true
+  fusion_type: no_change
+  synchronized: true
+  exchange_rate: 1
+  compare: false
+  evaluate: false
+  save_video: false
+  std2d: 5
+  std3d: 0.005
+  numInjectedParticles2d: 1000
+  numInjectedParticles3d: 1000
+  measurements2d_center: 0.25
+  measurements2d_std: 0.05
+  measurements3d_center: 0.25
+  measurements3d_std: 0.025
+  f_grasp_min: 0.3
+  f_grasp_max: 0.6
+  f_hap_min: 0.45
+  f_hap_max: 0.55
+
+pipeline_defaults:
+  common:
+    save_path_key: data_root
+    precomputed: true
+    recursive_estimation: true
+    init_particles: true
+    max_depth: 3
+    queue_length: 2
+    measurement_sigma: 0.02
+    distance_sigma: 0.06
+    init_lower_bound: 0.02
+    init_upper_bound: 0.95
+    injection_mu_offset: 0.1
+    injection_sigma_offset: 0.05
+    max_particle_movement: 0.05
+    occlusion_edge_detection_kernel_size: 21
+    occlusion_edge_detection_max_diff: 0.3
+    occlusion_near_object_max_diff: 1.5
+    logging: false
+    log images: false
+    log 3d: false
+    render_particle_k: 16
+  models:
+    graspnet:
+      save_path_key: graspnet
+      3d: true
+    hap:
+      save_path_key: hap
+      3d: false
+      init_lower_bound: 0.1
+      injection_mu_offset: 0.15
+      injection_sigma_offset: 0.3
+    hrp:
+      save_path_key: hrp
+      3d: false
+      init_lower_bound: 0.0001
+      init_upper_bound: 0.9999
+      render_particle_k: 8
+    where2act:
+      save_path_key: where2act
+      3d: true
+
+particle_filter_defaults:
+  common:
+    image_size: [640, 480]
+    num_particles: 8000
+  models:
+    graspnet:
+      dims: 3
+      std: 0.005
+    hap:
+      dims: 2
+      std: 15
+    hrp:
+      dims: 2
+      std: 1
+    where2act:
+      dims: 3
+      std: 0.005
