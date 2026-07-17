@@ -23,7 +23,7 @@ uv pip install -e pytorch_cgn/contact_graspnet_pytorch
 uv run python scripts/download_model_assets.py --asset contact_graspnet
 ```
 
-You can precompute the HAP data with `cpf-precompute --hap-adapter-module`.
+HAP does not have a license, so you have to clone their model [HAP Link](https://github.com/uiuc-robovision/hands-as-probes), save its predictions as a single heatmap under /data/hap_output/<object>/<object_instance>/<timestamp>_heatmap.npy
 
 ## Precompute model data
 
